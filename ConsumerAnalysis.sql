@@ -12,6 +12,24 @@ select segment, count(distinct product) as product_count FROM dim_product
 group by segment
 order by product_count desc;
 
+-- Which segment had the most increase in unique products in 2021 vs 2020?
+SELECT 
+    dp.segment, 
+    COUNT(DISTINCT CASE WHEN sp.fiscal_year = 2020 THEN sp.product_code END) AS unique_products_2020,
+    COUNT(DISTINCT CASE WHEN sp.fiscal_year = 2021 THEN sp.product_code END) AS unique_products_2021,
+    (COUNT(DISTINCT CASE WHEN sp.fiscal_year = 2021 THEN sp.product_code END)
+    - COUNT(DISTINCT CASE WHEN sp.fiscal_year = 2020 THEN sp.product_code END)) 
+    / COUNT(DISTINCT CASE WHEN sp.fiscal_year = 2020 THEN sp.product_code END) * 100 AS percentage_increase
+FROM 
+ dim_product dp
+ join fact_sales_monthly sp on dp.product_code= sp.product_code
+GROUP BY 
+    dp.segment
+ORDER BY 
+    percentage_increase DESC
+LIMIT 
+    1;
+
 
 
 -- Get the Top 3 products in each division that have a high total_sold_quantity in the fiscal_year 2021?
